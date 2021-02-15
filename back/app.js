@@ -1,5 +1,6 @@
 const createError = require('http-errors');
 const express = require('express');
+const db = require('./models/index');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
@@ -35,5 +36,14 @@ app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+(async () => {
+  try {
+    await db.sequelize.authenticate();
+    console.log('Connection has been established successfully.');
+  } catch (error) {
+    console.error('Unable to connect to the database:', error);
+  }
+})();
 
 module.exports = app;
