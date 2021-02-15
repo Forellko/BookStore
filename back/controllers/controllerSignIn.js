@@ -1,6 +1,7 @@
 const { StatusCodes } = require('http-status-codes');
 const bcrypt = require('bcrypt');
 const { user } = require('../models');
+const generateToken = require('../utils/generateToken');
 
 const controllerSignIn = async (req, res) => {
   let { email, password } = req.body;
@@ -28,20 +29,25 @@ const controllerSignIn = async (req, res) => {
         .json({ __filename, error: 'Wrong email or password' });
     }
 
-    const createdAt = Date.now();
-    const updatedAt = createdAt;
-    await user.create({
-      email,
-      password,
-      createdAt,
-      updatedAt,
-    });
+    const id = currentUser.id;
+
+    const accessToken = await generateToken(id);
+    const refreshToken = await generateToken(id, true);
+
+    user.update(
+      { refreshToken },
+      {
+        where: {
+          id,
+        },
+      }
+    );
+
+    return res.status(StatusCodes.OK).json({ accessToken, refreshToken });
   } catch (error) {
     console.log({ __filename, error });
     return res.status(400).json({ __filename, error });
   }
-
-  res.status(StatusCodes.OK).send('sign in');
 };
 
 module.exports = controllerSignIn;

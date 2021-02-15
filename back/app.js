@@ -1,3 +1,5 @@
+require('dotenv').config({ path: __dirname + '/.env' });
+
 const createError = require('http-errors');
 const express = require('express');
 const db = require('./models/index');
